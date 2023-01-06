@@ -1,0 +1,12 @@
+{
+    "compilerOptions": {
+        "noEmitOnError": true,
+        "noImplicitAny": true,
+        "outDir": "./app/build",
+        "removeComments": true,
+        "target": "ES6",
+        "module": "CommonJS",
+        "strict": true
+    },
+    "include": ["app/src/**/*"]
+}

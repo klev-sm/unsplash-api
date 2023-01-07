@@ -16,6 +16,7 @@ export default class App {
     private useMiddlewares() {
         this._server.use(express.json());
         this._server.use(express.urlencoded({ extended: true }));
+        this._server.use(express.static(__dirname));
     }
 
     private getRoutes() {

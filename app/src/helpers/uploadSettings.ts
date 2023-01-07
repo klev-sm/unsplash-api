@@ -10,6 +10,7 @@ cloudinary.config({
     api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
+// Multer settings
 const storage = multer.diskStorage({
     destination: function (_, __, cb) {
         const filesFolder = path.join(process.cwd(), "temp/");
@@ -24,7 +25,4 @@ const storage = multer.diskStorage({
     },
 });
 
-console.log("Path: " + path.join(process.cwd(), "temp/"));
-
-const multerUpload = multer({ storage });
-export { multerUpload };
+export { storage, cloudinary };

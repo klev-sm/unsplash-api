@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
-import { storage, cloudinary } from "../helpers/saveImagesSettings.js";
 import multer = require("multer");
+
+import { storage, cloudinary } from "../helpers/saveImagesSettings.js";
 import { ImageModel } from "../models/ImageModel.js";
 
 const multerUpload = multer({ storage }).single("image");

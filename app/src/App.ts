@@ -1,4 +1,6 @@
 import * as express from "express";
+import * as cors from "cors";
+
 import { uploaderRoutes } from "./routes/uploaderRoutes.js";
 
 export default class App {
@@ -20,6 +22,7 @@ export default class App {
     }
 
     private getRoutes() {
+        this._server.use(cors());
         this._server.use(uploaderRoutes);
     }
 

@@ -5,5 +5,5 @@ const ImageSchema = new mongoose.Schema({
 });
 
 mongoose.set("strictQuery", false);
-const ImageModel = mongoose.model("Images", ImageSchema);
+const ImageModel = mongoose.model("images", ImageSchema);
 export { ImageModel };

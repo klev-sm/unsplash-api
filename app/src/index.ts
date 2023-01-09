@@ -1,13 +1,12 @@
 import * as path from "path";
 import * as dotenv from "dotenv";
+const dotEnvPath = path.join(process.cwd(), "/.env");
+dotenv.config({ path: dotEnvPath });
+
 import mongoose from "mongoose";
 
 import App from "./App.js";
 
-const dotEnvPath = path.join(process.cwd(), "/.env");
-dotenv.config({ path: dotEnvPath });
-
-// connecting to database
 async function main() {
     // connecting to database
     const mongoConnection = await mongoose.connect(process.env.MONGO_URL!);

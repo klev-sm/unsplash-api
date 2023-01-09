@@ -3,8 +3,6 @@ import { v2 as cloudinary } from "cloudinary";
 import * as path from "path";
 import * as fs from "fs";
 
-console.log(process.env.PORT);
-
 // Cloudinary settings
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,

@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import multer = require("multer");
 
-import { storage, cloudinary } from "../helpers/saveImagesSettings.js";
+import { storage, cloudinary } from "../helpers/settingsLocalUpload.js";
 import { ImageModel } from "../models/ImageModel.js";
 
 const multerUpload = multer({ storage }).single("image");

@@ -9,9 +9,17 @@ import App from "./App.js";
 
 async function main() {
     // connecting to database
-    const mongoConnection = await mongoose.connect(process.env.MONGO_URL!);
-    if (mongoConnection.connection.readyState === 1) {
-        console.log("Database connection sucessfully estabelished");
+    try {
+        const mongoConnection = await mongoose.connect(process.env.MONGO_URL!);
+        if (!mongoConnection) {
+            throw new Error(mongoConnection);
+        } else {
+            if (mongoConnection.connection.readyState === 1) {
+                console.log("Database connection sucessfully estabelished");
+            }
+        }
+    } catch (error) {
+        console.log(error);
     }
 
     // creating an app

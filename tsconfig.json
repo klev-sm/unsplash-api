@@ -6,7 +6,8 @@
         "removeComments": true,
         "target": "ES6",
         "module": "CommonJS",
-        "strict": true
+        "strict": true,
+        "moduleResolution": "node"
     },
     "include": ["app/src/**/*"]
 }

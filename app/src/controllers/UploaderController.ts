@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { storage, cloudinary } from "../helpers/uploadSettings.js";
 import multer = require("multer");
+import { ImageModel } from "../models/ImageModel.js";
 
 const multerUpload = multer({ storage }).single("image");
 
@@ -29,10 +30,17 @@ export default class UploaderController {
                         const cloudinaryUpload =
                             await cloudinary.uploader.upload(savedImage);
                         if (cloudinaryUpload) {
-                            res.json({
-                                status: "Success to upload image to Cloudinary.",
-                                file: cloudinaryUpload.secure_url,
-                            }).status(201);
+                            const image = new ImageModel({
+                                link: cloudinaryUpload.secure_url,
+                            });
+                            if (image) {
+                                res.json({
+                                    status: "Success to upload image to Cloudinary and save it to database.",
+                                    file: image.link,
+                                }).status(201);
+                            } else {
+                                throw new Error(image);
+                            }
                         } else {
                             throw new Error(cloudinaryUpload);
                         }

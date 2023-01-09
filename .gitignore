@@ -109,3 +109,6 @@ dist
 # Uploader temp folder
 temp/
 
+# VSCode Settings
+.vscode
+

@@ -8,6 +8,35 @@ const multerUpload = multer({ storage }).single("image");
 
 // Routes Class
 export default class UploaderController {
+    static editImage(req: Request, res: Response) {
+        multerUpload(req, res, async function (err) {
+            if (err instanceof multer.MulterError) {
+                res.json({
+                    status: "Multer Error",
+                    message:
+                        "A Multer error occurred when saving to local folder.",
+                }).status(400);
+            } else if (err) {
+                res.json({
+                    status: "Multer Error",
+                    message:
+                        "An unknown error occurred when saving to local folder.",
+                }).status(400);
+            } else {
+                try {
+                    if (req.file) {
+                        // primeiro preciso editar a imagem no Cloudinary
+                        // depois pego o link que foi retornado
+                        // const imageId = req.body.imageId;
+                        // const update = { link: req.f };
+                        // const filter = {_id: imageId}
+                        // ImageModel.findOneAndUpdate(filter,);
+                    }
+                } catch (error) {}
+            }
+        });
+    }
+
     static async getImages(req: Request, res: Response): Promise<void> {
         try {
             const images = await ImageModel.find({});
@@ -52,6 +81,7 @@ export default class UploaderController {
                         if (cloudinaryUpload) {
                             const image = await new ImageModel({
                                 link: cloudinaryUpload.secure_url,
+                                publicID: cloudinaryUpload.public_id,
                             }).save();
                             if (image) {
                                 res.json({

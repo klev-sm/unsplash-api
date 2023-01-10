@@ -24,13 +24,21 @@ export default class UploaderController {
                 }).status(400);
             } else {
                 try {
+                    const publicID = req.body.publicID;
                     if (req.file) {
-                        // primeiro preciso editar a imagem no Cloudinary
-                        // depois pego o link que foi retornado
-                        // const imageId = req.body.imageId;
-                        // const update = { link: req.f };
-                        // const filter = {_id: imageId}
-                        // ImageModel.findOneAndUpdate(filter,);
+                        const updatedImage = req.file.path;
+                        const cloudinaryUpload =
+                            await cloudinary.uploader.upload(updatedImage, {
+                                public_id: publicID,
+                            });
+                        if (cloudinaryUpload) {
+                            // everything went fine on updating image to Cloudinary
+                            res.json({
+                                status: "Success on updating image to service.",
+                            }).status(200);
+                        } else {
+                            throw new Error(cloudinaryUpload);
+                        }
                     }
                 } catch (error) {}
             }

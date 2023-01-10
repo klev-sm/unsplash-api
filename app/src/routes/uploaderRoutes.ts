@@ -7,5 +7,6 @@ const uploaderRoutes = Router();
 uploaderRoutes
     .post("/images", UploadController.saveImage)
     .get("/images", UploadController.getImages)
-    .patch("/images", UploadController.editImage);
+    .patch("/images", UploadController.editImage)
+    .delete("/images", UploadController.deleteImage);
 export { uploaderRoutes };

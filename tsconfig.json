@@ -7,7 +7,7 @@
         "target": "ES6",
         "module": "CommonJS",
         "strict": true,
-        "moduleResolution": "node"
+        "moduleResolution": "node",
     },
     "include": ["app/src/**/*"]
 }

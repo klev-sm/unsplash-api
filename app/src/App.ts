@@ -2,6 +2,7 @@ import * as express from "express";
 import * as cors from "cors";
 
 import { uploaderRoutes } from "./routes/uploaderRoutes.js";
+import { helperRoutes } from "./routes/helperRoutes.js";
 
 export default class App {
     private _port: number;
@@ -18,12 +19,13 @@ export default class App {
     private useMiddlewares() {
         this._server.use(express.json());
         this._server.use(express.urlencoded({ extended: true }));
-        this._server.use(express.static(__dirname));
+        this._server.use(express.static("public"));
     }
 
     private getRoutes() {
         this._server.use(cors());
         this._server.use(uploaderRoutes);
+        this._server.use(helperRoutes);
     }
 
     // ---- Getters ----

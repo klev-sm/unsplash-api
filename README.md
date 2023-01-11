@@ -26,3 +26,9 @@ CLOUDINARY_API_KEY
 CLOUDINARY_API_SECRET
 MONGO_URL
 ```
+
+## Server will run on port 5000 if everything went fine
+#### Get the API documentation:
+```
+http://localhost:5000/docs
+```

@@ -129,9 +129,12 @@ export default class UploaderController {
 
     static async deleteImage(req: Request, res: Response) {
         try {
-            const publicID: string = req.body.publicID;
+            const publicID: string = req.params.publicID;
             if (publicID === undefined) {
-                throw new Error("Can't find an undefined public id.");
+                const err = new Error();
+                err.message = "Can't find an undefined public id.";
+                err.name = "Not found";
+                throw err;
             }
             const cloudinaryDeletedImage = await cloudinary.uploader.destroy(
                 publicID
@@ -153,13 +156,24 @@ export default class UploaderController {
                     );
                 }
             } else {
-                throw new Error(
-                    "Can't delete image from Cloudinary. Error: " +
-                        cloudinaryDeletedImage
-                );
+                const err = new Error();
+                err.message = `Can't delete image from Cloudinary. Error: ${cloudinaryDeletedImage}`;
+                err.name = "Cloudinary Error";
+                throw err;
             }
         } catch (error: any) {
-            jsonResponse(res, 400, "Not able to delete image!", error.message);
+            let statusCode: number = 400;
+
+            if (error.name === "Not Found") {
+                statusCode = 404;
+            }
+
+            jsonResponse(
+                res,
+                statusCode,
+                "Not able to delete image!",
+                error.message
+            );
         }
     }
 }

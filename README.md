@@ -2,6 +2,7 @@
 <p align="center">This is the first part of the solution for a challenge from <a href="https://devchallenges.io">devchallenges.io</a></p>
 
 <p align="center"><a href="https://unsplash-yi42.onrender.com">API Server</a> | <a href="https://unsplash-yi42.onrender.com/docs">Swagger Documentation</a></p>
+
 ## How To Use
 To clone and run this application, you'll need Git and Node.js (which comes with npm) installed on your computer. 
 From your command line:

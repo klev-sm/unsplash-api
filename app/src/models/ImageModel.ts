@@ -5,6 +5,6 @@ const ImageSchema = new mongoose.Schema({
   publicID: String,
 });
 
-mongoose.set("strictQuery", false); // FIXME Isso aqui é necessario mesmo?
+mongoose.set("strictQuery", false); // FIXME Isso aqui é necessario mesmo???
 const ImageModel = mongoose.model("images", ImageSchema);
 export { ImageModel };

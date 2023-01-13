@@ -1,10 +1,6 @@
 import mongoose from "mongoose";
-// FIXME neste file voce possui tanto schema quanto models, voce poderia dividir em arquivos diferentes para melhorar a organizacao.
-const ImageSchema = new mongoose.Schema({
-  link: String,
-  publicID: String,
-});
-
+import { ImageSchema } from "./ImageSchema";
 mongoose.set("strictQuery", false); // FIXME Isso aqui é necessario mesmo???
+// FIXME RESPOSTA: quando eu tiro essa opção, o mongoose joga um WARNING no console
 const ImageModel = mongoose.model("images", ImageSchema);
 export { ImageModel };

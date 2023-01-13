@@ -1,18 +1,24 @@
-import { Request, Response, json } from "express";
-import multer = require("multer");
+import { Request, RequestHandler, Response } from "express";
+import * as multer from "multer";
+import { StorageEngine } from "multer";
+import { ConfigOptions } from "cloudinary";
 
-import { storage, cloudinary } from "../helpers/settingsLocalUpload.js";
 import { ImageModel } from "../models/ImageModel.js";
 import jsonResponse from "../helpers/jsonResponse.js";
 
-const multerUpload = multer({ storage }).single("image");
+import { LocalUploader } from "../models/LocalUploader.js";
+import { CloudUploader } from "../models/CloudUploader.js";
+
+const localUploader = new LocalUploader();
+const localStorage: StorageEngine = localUploader.localStorage;
+const multerUploader: RequestHandler = localUploader.multerSetup(localStorage);
+const cloudUploader: ConfigOptions = CloudUploader.cloudinarySetup();
 
 // Routes Class
 // Essa classe ta desorganizada, precisamos organiza-la.
-// FIXME Evite usar o default para exportar uma classe. Dessa forma voce nao garante que quem importar, importará com o mesmo nome da classe que voce declarou.
-export default class UploaderController {
-  static saveImage(req: Request, res: Response): void {
-    multerUpload(req, res, async function (err) {
+export class UploaderController {
+  public saveImage(req: Request, res: Response): void {
+    multerUploader(req, res, async (err) => {
       // Treating multer erros
       if (err instanceof multer.MulterError) {
         jsonResponse(
@@ -33,7 +39,7 @@ export default class UploaderController {
         try {
           if (req.file) {
             const savedImage = req.file.path;
-            const cloudinaryUpload = await cloudinary.uploader.upload(
+            const cloudinaryUpload = await cloudUploader.uploader.upload(
               savedImage
             );
             if (cloudinaryUpload) {
@@ -64,7 +70,7 @@ export default class UploaderController {
     });
   }
 
-  static async getImages(_: Request, res: Response): Promise<void> {
+  public async getImages(_: Request, res: Response): Promise<void> {
     try {
       const images = await ImageModel.find({});
       if (images) {
@@ -82,8 +88,8 @@ export default class UploaderController {
     }
   }
 
-  static editImage(req: Request, res: Response) {
-    multerUpload(req, res, async function (err) {
+  public editImage(req: Request, res: Response) {
+    multerUploader(req, res, async (err) => {
       if (err instanceof multer.MulterError) {
         jsonResponse(
           res,
@@ -104,7 +110,7 @@ export default class UploaderController {
           if (publicID) {
             if (req.file) {
               const updatedImage = req.file.path;
-              const cloudinaryUpload = await cloudinary.uploader.upload(
+              const cloudinaryUpload = await cloudUploader.uploader.upload(
                 updatedImage,
                 {
                   public_id: publicID,
@@ -128,7 +134,7 @@ export default class UploaderController {
     });
   }
 
-  static async deleteImage(req: Request, res: Response) {
+  public async deleteImage(req: Request, res: Response) {
     try {
       const publicID: string = req.params.publicID;
       if (publicID === undefined) {
@@ -137,7 +143,7 @@ export default class UploaderController {
         err.name = "Not found";
         throw err;
       }
-      const cloudinaryDeletedImage = await cloudinary.uploader.destroy(
+      const cloudinaryDeletedImage = await cloudUploader.uploader.destroy(
         publicID
       );
       if (cloudinaryDeletedImage) {

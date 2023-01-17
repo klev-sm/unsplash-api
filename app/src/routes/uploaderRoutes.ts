@@ -1,12 +1,13 @@
 import { Router } from "express";
 
-import UploadController from "../controllers/UploaderController.js";
+import { UploaderController } from "../controllers/UploaderController.js";
 
 const uploaderRoutes = Router();
+
 // routes
 uploaderRoutes
-    .post("/images", UploadController.saveImage)
-    .get("/images", UploadController.getImages)
-    .patch("/images", UploadController.editImage)
-    .delete("/images/:publicID", UploadController.deleteImage);
+  .post("/images", UploaderController.saveImage)
+  .get("/images", UploaderController.getImages)
+  .patch("/images", UploaderController.editImage)
+  .delete("/images/:publicID", UploaderController.deleteImage);
 export { uploaderRoutes };

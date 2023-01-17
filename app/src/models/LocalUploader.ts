@@ -5,23 +5,16 @@ import * as path from "path";
 import * as fs from "fs";
 
 class LocalUploader {
-  public localStorage: StorageEngine;
+  public localUploader: RequestHandler;
 
   constructor() {
-    this.localStorage = this.storageSetup();
+    this.localUploader = this.setup();
   }
 
-  public multerSetup(storage: StorageEngine) {
-    const multerUploader: RequestHandler = multer({ storage: storage }).single(
-      "image"
-    );
-    return multerUploader;
-  }
-
-  // setting up the destination and filename where
-  // the image will be saved on local files
-  public storageSetup(): StorageEngine {
-    const storage = multer.diskStorage({
+  private setup(): RequestHandler {
+    // setting up the destination and filename where
+    // the image will be saved on local files
+    const storage: StorageEngine = multer.diskStorage({
       destination: function (_, __, cb) {
         const filesFolder = path.join(process.cwd(), "temp/");
         fs.mkdirSync(filesFolder, { recursive: true });
@@ -34,7 +27,8 @@ class LocalUploader {
         cb(null, Date.now() + fileExtension);
       },
     });
-    return storage;
+    const multerUploader = multer({ storage: storage }).single("image");
+    return multerUploader;
   }
 }
 

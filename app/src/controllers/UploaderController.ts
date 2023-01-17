@@ -8,8 +8,6 @@ import { saveImageToDatabase } from "../helpers/saveImageToDatabase.js";
 import { error, multerErrors } from "../helpers/treatingErrors.js";
 import { CloudUploader } from "../models/CloudUploader.js";
 
-// FIXME esse código aqui não funciona dentro de um construtor,
-// por isso colquei fora!!!
 const { localUploader } = new LocalUploader();
 const { cloudUploader } = new CloudUploader();
 

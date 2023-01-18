@@ -4,7 +4,7 @@ import * as fs from "fs";
 import { ImageModel } from "../models/ImageModel.js";
 import jsonResponse from "../helpers/treatingResponses.js";
 import { LocalUploader } from "../models/LocalUploader.js";
-import { saveImageToDatabase } from "../helpers/saveImageToDatabase.js";
+import { saveImageToDatabase } from "../helpers/databaseOperations.js";
 import { error, multerErrors } from "../helpers/treatingErrors.js";
 import { CloudUploader } from "../models/CloudUploader.js";
 
@@ -23,6 +23,10 @@ export class UploaderController {
         jsonResponse(res, 500, "Multer Error", `${errorMessage}: ${err}`);
       } else {
         try {
+          const { subtitle } = req.body;
+          if (subtitle === undefined) {
+            throw new Error("Subtitle not found.");
+          }
           if (req.file) {
             // image succesfully saved to local temp folder
             // getting the path of the saved image in temp folder
@@ -30,11 +34,15 @@ export class UploaderController {
             // uploading image to Cloudinary service.
             const uploadedImage = await cloudUploader.uploader.upload(locallySavedImage, {
               transformation: [{ quality: 30 }],
+              folder: "images",
             });
             if (!uploadedImage) {
               throw new Error(uploadedImage);
             } else {
-              const databaseSavedImage = await saveImageToDatabase(uploadedImage);
+              const databaseSavedImage = await saveImageToDatabase(
+                uploadedImage,
+                subtitle
+              );
               if (!databaseSavedImage) {
                 throw new Error(databaseSavedImage);
               } else {
@@ -46,7 +54,10 @@ export class UploaderController {
                     res,
                     201,
                     "Success on uploading image to Cloudinary and saving it to database",
-                    databaseSavedImage.link!
+                    {
+                      imageLink: databaseSavedImage.link!,
+                      subtitle: subtitle,
+                    }
                   );
                 });
               }
@@ -55,7 +66,7 @@ export class UploaderController {
             throw new Error("Invalid image format.");
           }
         } catch (error: any) {
-          jsonResponse(res, 403, "Cloudinary Error", error.message);
+          jsonResponse(res, 403, "Upload Error!", error.message);
         }
       }
     });
@@ -82,30 +93,42 @@ export class UploaderController {
         jsonResponse(res, 500, "Multer Error", `${errorMessage}: ${err}`);
       } else {
         try {
-          const publicID: string = req.body.publicID;
-          if (publicID) {
-            if (req.file) {
-              const updatedImage = req.file.path;
-              const cloudinaryUpload = await cloudUploader.uploader.upload(updatedImage, {
-                public_id: publicID,
-                invalidate: true,
-              });
-              if (!cloudinaryUpload) {
-                // everything went fine on updating image to Cloudinary
-                throw new Error(cloudinaryUpload);
+          const { id, subtitle } = req.body;
+          if (id) {
+            const image = await ImageModel.findById(id);
+            if (image) {
+              if (req.file) {
+                const updatedImage = req.file.path;
+                const cloudinaryUpload = await cloudUploader.uploader.upload(
+                  updatedImage,
+                  {
+                    public_id: image.publicID,
+                    invalidate: true,
+                    transformation: [{ quality: 30 }],
+                  }
+                );
+                if (!cloudinaryUpload) {
+                  // everything went fine on updating image to Cloudinary
+                  throw new Error(cloudinaryUpload);
+                }
+                fs.unlink(updatedImage, (err) => {
+                  if (err) throw err;
+                });
               }
-              // everything went fine!
-              // deleting image from temp folder and returning response
-              fs.unlink(updatedImage, (err) => {
-                if (err) throw err;
-                jsonResponse(res, 201, "Success on updating image to service");
-              });
+              if (subtitle) {
+                image.updateOne({ subtitle: subtitle }).catch((err) => {
+                  throw new Error(err);
+                });
+              }
+              jsonResponse(res, 201, "Success on updating image to service.");
+            } else {
+              throw new Error("Image not found");
             }
           } else {
-            throw new Error("Invalid public ID");
+            throw new Error("Invalid uri.");
           }
         } catch (error: any) {
-          jsonResponse(res, 400, "Failed to update image.", error);
+          jsonResponse(res, 400, "Failed to update image.", error.message);
         }
       }
     });
@@ -113,27 +136,41 @@ export class UploaderController {
 
   public static async deleteImage(req: Request, res: Response) {
     try {
-      const publicID: string = req.params.publicID;
-      if (publicID === undefined) {
-        error("Can't find an undefined public id.", "Not Found.");
-      }
-      const cloudinaryDeletedImage = await cloudUploader.uploader.destroy(publicID);
-      if (cloudinaryDeletedImage) {
-        const databaseDeletedImage = await ImageModel.deleteOne({
-          publicID: publicID,
-        });
-        if (databaseDeletedImage) {
-          jsonResponse(res, 200, "Success on deleting image to database and Cloudinary.");
-        } else {
-          throw new Error(
-            "Can't delete image from database. Error: " + databaseDeletedImage
-          );
-        }
+      const id: string = req.params.id;
+      if (id === undefined) {
+        error("Can't find an undefined id.", "Not Found.");
       } else {
-        error(
-          `Can't delete image from Cloudinary. Error: ${cloudinaryDeletedImage}`,
-          "Cloudinary Error"
-        );
+        const image = await ImageModel.findById(id);
+        if (image) {
+          const imagePublicID = image.publicID;
+          const cloudinaryDeletedImage = await cloudUploader.uploader.destroy(
+            imagePublicID!
+          );
+
+          if (cloudinaryDeletedImage) {
+            const databaseDeletedImage = await ImageModel.deleteOne({
+              publicID: imagePublicID,
+            });
+            if (databaseDeletedImage) {
+              jsonResponse(
+                res,
+                200,
+                "Success on deleting image to database and Cloudinary."
+              );
+            } else {
+              throw new Error(
+                "Can't delete image from database. Error: " + databaseDeletedImage
+              );
+            }
+          } else {
+            error(
+              `Can't delete image from Cloudinary. Error: ${cloudinaryDeletedImage}`,
+              "Cloudinary Error"
+            );
+          }
+        } else {
+          error("Image does not exists.", "Not Found");
+        }
       }
     } catch (error: any) {
       let statusCode: number = 400;

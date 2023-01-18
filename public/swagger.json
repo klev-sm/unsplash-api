@@ -7,7 +7,7 @@
       "name": "MIT License",
       "url": "https://opensource.org/licenses/MIT"
     },
-    "version": "1.0.0"
+    "version": "1.0.1"
   },
   "externalDocs": {
     "description": "Find out more about Swagger",
@@ -43,6 +43,10 @@
                   "image": {
                     "type": "string",
                     "format": "binary"
+                  },
+                  "subtitle": {
+                    "type": "string",
+                    "description": "The subtitle is required but you can pass it with empty value."
                   }
                 }
               }
@@ -144,9 +148,9 @@
         "tags": [
           "images"
         ],
-        "description": "The link in the database remains the same, changing only the image saved in Cloudinary",
+        "description": "If it was passed, the subtitle is changed on database, but the image link in the database remains the same, changing only the image uploaded to Cloudinary.",
         "requestBody": {
-          "description": "You need to provide the publicID and the image that you want to overwrite the saved image on Cloudinary and database.",
+          "description": "You need to provide the mongo's database (_id) in order to the route find the image that you want to edit. You can edit image or subtitle or both, the only thing that changes it is if you pass or not the valou of a propertie.",
           "required": true,
           "content": {
             "multipart/form-data": {
@@ -158,9 +162,12 @@
                     "format": "binary",
                     "description": "The image that will serve to update"
                   },
-                  "publicID": {
+                  "id": {
                     "type": "string",
-                    "description": "It is the identifier of the image in database and Cloudinary"
+                    "description": "It is the identifier of the image only in the database"
+                  },
+                  "subtitle": {
+                    "type": "string"
                   }
                 }
               }
@@ -191,7 +198,7 @@
         }
       }
     },
-    "/images/{publicID}": {
+    "/images/{id}": {
       "delete": {
         "summary": "Delete a saved image",
         "tags": [
@@ -199,9 +206,9 @@
         ],
         "parameters": [
           {
-            "name": "publicID",
+            "name": "id",
             "in": "path",
-            "description": "The publicID of the saved image to delete.",
+            "description": "The id of the saved image in database to delete.",
             "required": true,
             "schema": {
               "type": "string"

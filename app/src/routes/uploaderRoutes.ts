@@ -9,5 +9,5 @@ uploaderRoutes
   .post("/images", UploaderController.saveImage)
   .get("/images", UploaderController.getImages)
   .patch("/images", UploaderController.editImage)
-  .delete("/images/:publicID", UploaderController.deleteImage);
+  .delete("/images/:id", UploaderController.deleteImage);
 export { uploaderRoutes };

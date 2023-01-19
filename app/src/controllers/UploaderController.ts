@@ -55,6 +55,7 @@ export class UploaderController {
                     201,
                     "Success on uploading image to Cloudinary and saving it to database",
                     {
+                      id: databaseSavedImage._id,
                       imageLink: databaseSavedImage.link!,
                       subtitle: subtitle,
                     }

@@ -63,13 +63,24 @@
                   "properties": {
                     "message": {
                       "type": "string",
-                      "description": "Success message.",
-                      "example": "Success on uploading image"
+                      "example": "Success on uploading image to Cloudinary and saving it to database"
                     },
                     "response": {
-                      "type": "string",
-                      "description": "URI to the uploaded image.",
-                      "example": "https://res.cloudinary.com/dpuvdfcf9/image/upload/v1673367591/pu5mlbvhtienaasep4hx.jpg"
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "example": "63c93d3374cc28be0abf44e1"
+                        },
+                        "imageLink": {
+                          "type": "string",
+                          "example": "https://res.cloudinary.com/dpuvdfcf9/image/upload/v1674132785/images/eqdw6qiupjoou2mm3m0j.png"
+                        },
+                        "subtitle": {
+                          "type": "string",
+                          "example": "Logo Flamengo"
+                        }
+                      }
                     }
                   }
                 }

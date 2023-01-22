@@ -1,10 +1,20 @@
-import { v2 as cloudinary } from "cloudinary";
+import { UploadApiOptions, UploadApiResponse, v2 as cloudinary } from "cloudinary";
 
 class CloudUploader {
-  public cloudUploader;
-
   constructor() {
-    this.cloudUploader = this.setup();
+    this.setup();
+  }
+
+  public async uploader(
+    locallySavedImage: string,
+    options?: UploadApiOptions | undefined
+  ): Promise<UploadApiResponse> {
+    // uploading image to Cloudinary service.
+    const uploadedImage: UploadApiResponse = await cloudinary.uploader.upload(
+      locallySavedImage,
+      options
+    );
+    return uploadedImage;
   }
 
   private setup() {
@@ -13,7 +23,6 @@ class CloudUploader {
       api_key: process.env.CLOUDINARY_API_KEY,
       api_secret: process.env.CLOUDINARY_API_SECRET,
     });
-    return cloudinary;
   }
 }
 

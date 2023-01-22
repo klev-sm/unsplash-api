@@ -1,22 +1,56 @@
+import { promisify } from "util";
 import * as multer from "multer";
 import { StorageEngine } from "multer";
-import { RequestHandler } from "express";
+import { RequestHandler, Request, Response } from "express";
 import * as path from "path";
 import * as fs from "fs";
 
+import { ILocalImage } from "./ILocalImage.js";
+import jsonResponse from "../helpers/treatingResponses.js";
+
 class LocalUploader {
-  public localUploader: RequestHandler;
+  protected storage: StorageEngine;
 
   constructor() {
-    this.localUploader = this.setup();
+    this.storage = this.setupStorage();
   }
 
-  private setup(): RequestHandler {
-    // setting up the destination and filename where
-    // the image will be saved on local files
+  public async startUpload(req: Request, res: Response): Promise<ILocalImage> {
+    // getting the function that handles local saving
+    const handler: RequestHandler = multer({ storage: this.storage }).single("image");
+    const uploader = promisify(handler);
+    // waiting for uploader to complete the request
+    await uploader(req, res);
+    /* the req.body have to be used here when the previous uploader
+    function changes the value of the object
+    */
+    let { subtitle } = req.body;
+    if (!subtitle) {
+      subtitle = "";
+    }
+    // with uploader function sucess, req.file has be changed.
+    if (!req.file) {
+      return {
+        res: undefined,
+        locallySavedImage: undefined,
+        subtitle: undefined,
+      };
+    }
+    const locallySavedImage: string = req.file.path;
+    const savedImage = {
+      res: res,
+      locallySavedImage: locallySavedImage,
+      subtitle: subtitle,
+    };
+    return savedImage;
+  }
+
+  private setupStorage(): StorageEngine {
+    // setting up the destination and filename where the image will be saved on local files
     const storage: StorageEngine = multer.diskStorage({
       destination: function (_, __, cb) {
         const filesFolder = path.join(process.cwd(), "temp/");
+        // creating directory if not exists on destination
         fs.mkdirSync(filesFolder, { recursive: true });
         cb(null, filesFolder);
       },
@@ -27,8 +61,7 @@ class LocalUploader {
         cb(null, Date.now() + fileExtension);
       },
     });
-    const multerUploader = multer({ storage: storage }).single("image");
-    return multerUploader;
+    return storage;
   }
 }
 

@@ -70,26 +70,33 @@ class UserController {
         { bio: bio },
         { phone: phone },
       ];
-      const foundUser = await UserModel.findById(id);
-      if (foundUser) {
-        let changedFields: Array<Object> = [];
-        fields.forEach((field) => {
-          if (Object.values(field)[0] != undefined) {
-            const key = Object.keys(field)[0];
-            const value = Object.values(field)[0];
-            changedFields.push({
-              [key]: value,
-            });
-          }
-        });
-        const updatedFields = await foundUser.updateOne(changedFields[0]);
-        if (updatedFields) {
-          jsonResponse(res, 200, "User successfully updated.");
-        } else {
-          throw new Error("Can't update fields");
-        }
+      const alreadyUsedEmail = await UserModel.findOne({
+        email: email,
+      });
+      if (alreadyUsedEmail) {
+        throw new Error("Email already exists.");
       } else {
-        throw new Error("User not found.");
+        const foundUser = await UserModel.findById(id);
+        if (foundUser) {
+          let changedFields: Array<Object> = [];
+          fields.forEach((field) => {
+            if (Object.values(field)[0] != undefined) {
+              const key = Object.keys(field)[0];
+              const value = Object.values(field)[0];
+              changedFields.push({
+                [key]: value,
+              });
+            }
+          });
+          const updatedFields = await foundUser.updateOne(changedFields[0]);
+          if (updatedFields) {
+            jsonResponse(res, 201, "User successfully updated.");
+          } else {
+            throw new Error("Can't update fields");
+          }
+        } else {
+          throw new Error("User not found.");
+        }
       }
     } catch (error: any) {
       jsonResponse(res, 400, error.message);

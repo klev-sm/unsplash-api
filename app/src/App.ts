@@ -4,6 +4,7 @@ import * as cors from "cors";
 import * as swaggerUi from "swagger-ui-express";
 
 import { uploaderRoutes } from "./routes/uploaderRoutes.js";
+import { userRoutes } from "./routes/userRoutes.js";
 
 export default class App {
   public app: Application;
@@ -24,6 +25,7 @@ export default class App {
 
   private getRoutes() {
     this.app.use(uploaderRoutes);
+    this.app.use(userRoutes);
     this.app.use(
       "/docs",
       swaggerUi.serve,

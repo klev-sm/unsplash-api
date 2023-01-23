@@ -1,6 +1,6 @@
 import { UploadApiOptions, UploadApiResponse, v2 as cloudinary } from "cloudinary";
 
-class CloudUploader {
+class CloudinaryUploader {
   constructor() {
     this.setup();
   }
@@ -17,6 +17,11 @@ class CloudUploader {
     return uploadedImage;
   }
 
+  public async destroyer(publicID: string): Promise<any> {
+    const deletedImage = await cloudinary.uploader.destroy(publicID);
+    return deletedImage;
+  }
+
   private setup() {
     cloudinary.config({
       cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -26,4 +31,4 @@ class CloudUploader {
   }
 }
 
-export { CloudUploader };
+export { CloudinaryUploader };

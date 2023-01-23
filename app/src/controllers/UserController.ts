@@ -88,6 +88,7 @@ class UserController {
               });
             }
           });
+          // TODO tem algo de errado com essa linha
           const updatedFields = await foundUser.updateOne(changedFields[0]);
           if (updatedFields) {
             jsonResponse(res, 201, "User successfully updated.");

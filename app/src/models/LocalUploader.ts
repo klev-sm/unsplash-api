@@ -6,7 +6,6 @@ import * as path from "path";
 import * as fs from "fs";
 
 import { ILocalImage } from "./ILocalImage.js";
-import jsonResponse from "../helpers/treatingResponses.js";
 
 class LocalUploader {
   protected storage: StorageEngine;
@@ -22,23 +21,16 @@ class LocalUploader {
     // waiting for uploader to complete the request
     await uploader(req, res);
     /* the req.body have to be used here when the previous uploader
-    function changes the value of the object
-    */
-    let { subtitle } = req.body;
+    function changes the value of the object */
+    let { subtitle, id } = req.body;
+    // with uploader function sucess, req.file has be changed.
+    const locallySavedImage: string | undefined = req.file?.path;
     if (!subtitle) {
       subtitle = "";
     }
-    // with uploader function sucess, req.file has be changed.
-    if (!req.file) {
-      return {
-        res: undefined,
-        locallySavedImage: undefined,
-        subtitle: undefined,
-      };
-    }
-    const locallySavedImage: string = req.file.path;
     const savedImage = {
       res: res,
+      id: id,
       locallySavedImage: locallySavedImage,
       subtitle: subtitle,
     };

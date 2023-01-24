@@ -181,6 +181,23 @@ class UserController {
       jsonResponse(res, statusCode, "Failed to return users", error!);
     }
   }
+
+  public async getUserImages(req: Request, res: Response) {
+    try {
+      const id = req.body;
+      if (!id) {
+        throw new Error("User not found");
+      }
+      const foundUser = await UserModel.findById(id).populate("images");
+      if (foundUser) {
+        jsonResponse(res, 200, "User Sucessfully returned", foundUser);
+      } else {
+        throw new Error("Failed to find user.");
+      }
+    } catch (error) {
+      jsonResponse(res, 400, "Error !");
+    }
+  }
 }
 
 export { UserController };

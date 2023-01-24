@@ -8,6 +8,7 @@ import { deleteTempImage } from "../helpers/deleteTempImage.js";
 import { updateFields, updateImage } from "../helpers/updateFields.js";
 import { error } from "../helpers/treatingErrors.js";
 import { Controller } from "./Controller.js";
+import { ICustomRequest } from "../models/interfaces/ICustomRequest.js";
 
 // Routes Class
 export class UploaderController {

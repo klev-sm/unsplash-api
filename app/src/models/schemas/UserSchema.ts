@@ -1,4 +1,5 @@
-import { Schema } from "mongoose";
+import { Schema, Types } from "mongoose";
+
 import { IUserDocument } from "../interfaces/IUserDocument";
 
 const UserSchema: Schema<IUserDocument> = new Schema({
@@ -18,6 +19,12 @@ const UserSchema: Schema<IUserDocument> = new Schema({
   bio: String,
   phone: String,
   profilePicture: String,
+  images: [
+    {
+      type: Types.ObjectId,
+      ref: "images",
+    },
+  ],
 });
 
 export { UserSchema };

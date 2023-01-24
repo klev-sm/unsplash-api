@@ -249,7 +249,7 @@
         "tags": [
           "user"
         ],
-        "description": "Only username, password and email are required. The other fields will only be setted when editing user through PUT route. Every user that you creates have an default profile picture that is an image already saved on Cloudinary service, you can change the default picture after on PUT route.",
+        "description": "Only username, password and email are required. The other fields will only be setted when editing user through PUT route. Every user that you creates have an default profile picture that is an image already saved on Cloudinary service, you can change the default picture after on PUT route. This route will also return an authentication token, that you have to store on client cookies using httpOnly",
         "requestBody": {
           "required": true,
           "content": {
@@ -266,7 +266,7 @@
                   },
                   "password": {
                     "type": "string",
-                    "description": "The password will be encrypted on back-end. You can update it from PUT route, but you will never get."
+                    "description": "The password will be hashed on back-end. You can update it from PUT route, but you will never get."
                   }
                 }
               }
@@ -303,6 +303,10 @@
                         "profilePicture": {
                           "type": "string",
                           "example": "https://res.cloudinary.com/dpuvdfcf9/image/upload/v1674144178/userPictures/0596bdb89b60fe771acd2f5972a9d3e3_isnvff.jpg"
+                        },
+                        "token": {
+                          "type": "string",
+                          "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2M2NmMjhmZTZhNTIzZDJhNWE4NWQ1ZTIiLCJlbWFpbCI6ImtsZXZlcnRvbkBnbWFpbC5jb20iLCJ1c2VybmFtZSI6IktsZXZlcnRvbiIsImlhdCI6MTY3NDU3OTAyMCwiZXhwIjoxNjc0NzUxODIwfQ.FwfcRSuMCBwmvQTOJgn0EVgnlgJAf1g7AUdVytFfgiM"
                         }
                       }
                     }
@@ -503,6 +507,72 @@
           },
           "404": {
             "description": "Not possible to find given id"
+          }
+        }
+      }
+    },
+    "/user/login": {
+      "post": {
+        "summary": "Route to login an user",
+        "tags": [
+          "user"
+        ],
+        "description": "Route to authenticate an user, you need to provide a valid and unused e-mail and a password. This route will also return an authentication token, that you have to store on client cookies using httpOnly",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "description": "You need to pass an email that does not exists on database."
+                  },
+                  "password": {
+                    "type": "string",
+                    "description": "The password will be hashed on back-end."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Sucessfully logged in.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "user": {
+                      "type": "object",
+                      "properties": {
+                        "userID": {
+                          "type": "string",
+                          "example": "63cf28fe6a523d2a5a85d5e2"
+                        },
+                        "email": {
+                          "type": "string",
+                          "example": "kleverton@gmail.com"
+                        }
+                      }
+                    },
+                    "token": {
+                      "type": "string",
+                      "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2M2NmMjhmZTZhNTIzZDJhNWE4NWQ1ZTIiLCJlbWFpbCI6ImtsZXZlcnRvbkBnbWFpbC5jb20iLCJ1c2VybmFtZSI6IktsZXZlcnRvbiIsImlhdCI6MTY3NDU3OTAyMCwiZXhwIjoxNjc0NzUxODIwfQ.FwfcRSuMCBwmvQTOJgn0EVgnlgJAf1g7AUdVytFfgiM"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Default error message"
+          },
+          "404": {
+            "description": "Some fields not found it."
           }
         }
       }

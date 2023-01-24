@@ -443,6 +443,40 @@
                     "message": {
                       "type": "string",
                       "example": "User sucessfully updated."
+                    },
+                    "response": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "example": "63cf28fe6a523d2a5a85d5e2"
+                        },
+                        "user": {
+                          "type": "string",
+                          "example": "Kleverton"
+                        },
+                        "email": {
+                          "type": "string",
+                          "example": "kleverton@gmail.com"
+                        },
+                        "profilePicture": {
+                          "type": "string",
+                          "example": "https://res.cloudinary.com/dpuvdfcf9/image/upload/v1674144178/userPictures/0596bdb89b60fe771acd2f5972a9d3e3_isnvff.jpg"
+                        }
+                      }
+                    },
+                    "changedFields": {
+                      "type": "array",
+                      "description": "This array will have the changed fields that you passed in requisition",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "bio": {
+                            "type": "string",
+                            "example": "Admin do grupo"
+                          }
+                        }
+                      }
                     }
                   }
                 }

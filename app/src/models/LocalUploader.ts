@@ -1,6 +1,7 @@
 import { promisify } from "util";
 import * as multer from "multer";
 import { StorageEngine } from "multer";
+import * as bcrypt from "bcrypt";
 import { RequestHandler, Request, Response } from "express";
 import * as path from "path";
 import * as fs from "fs";
@@ -14,15 +15,23 @@ class LocalUploader {
     this.storage = this.setupStorage();
   }
 
-  public async startUpload(req: Request, res: Response): Promise<ILocalImage> {
+  public async startUpload(
+    req: Request,
+    res: Response,
+    folder: string
+  ): Promise<ILocalImage> {
     // getting the function that handles local saving
-    const handler: RequestHandler = multer({ storage: this.storage }).single("image");
+    const handler: RequestHandler = multer({ storage: this.storage }).single(folder);
     const uploader = promisify(handler);
     // waiting for uploader to complete the request
     await uploader(req, res);
     /* the req.body have to be used here when the previous uploader
     function changes the value of the object */
-    let { subtitle, id } = req.body;
+    let { subtitle, id, username, email, bio, phone, password } = req.body;
+    if (password) {
+      // hashed password
+      password = await bcrypt.hash(password, 10);
+    }
     // with uploader function sucess, req.file has be changed.
     const locallySavedImage: string | undefined = req.file?.path;
     if (!subtitle) {
@@ -33,6 +42,12 @@ class LocalUploader {
       id: id,
       locallySavedImage: locallySavedImage,
       subtitle: subtitle,
+      profilePicture: locallySavedImage,
+      username: username,
+      email: email,
+      bio: bio,
+      phone: phone,
+      password: password,
     };
     return savedImage;
   }

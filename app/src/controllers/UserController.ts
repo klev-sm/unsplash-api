@@ -1,17 +1,27 @@
-import { Request, Response, json } from "express";
+import { Request, Response } from "express";
 import * as bcrypt from "bcrypt";
-import jsonResponse from "../helpers/treatingResponses";
-import { UserModel } from "../models/UserModel";
 
-const saltRound = 10;
-const profilePicture =
-  "https://res.cloudinary.com/dpuvdfcf9/image/upload/v1674144178/userPictures/0596bdb89b60fe771acd2f5972a9d3e3_isnvff.jpg";
+import jsonResponse from "../helpers/treatingResponses.js";
+import { UserModel } from "../models/UserModel.js";
+import { updateFields } from "../helpers/updateFields.js";
+import { Controller } from "./Controller.js";
 
 class UserController {
-  public static async createUser(req: Request, res: Response): Promise<void> {
-    const { username, email, password } = req.body;
+  private controller: Controller;
+  private saltRound: number;
+  private defaultProfilePic: string;
+
+  constructor(controller: Controller, salt: number) {
+    this.controller = controller;
+    this.saltRound = salt;
+    this.defaultProfilePic =
+      "https://res.cloudinary.com/dpuvdfcf9/image/upload/v1674144178/userPictures/0596bdb89b60fe771acd2f5972a9d3e3_isnvff.jpg";
+  }
+
+  public async createUser(req: Request, res: Response): Promise<void> {
     try {
-      const hashedPassword = await bcrypt.hash(password, saltRound);
+      const { username, email, password } = req.body;
+      const hashedPassword = await bcrypt.hash(password, this.saltRound);
       // an error occured trying to generate salt or creating hash
       if (typeof hashedPassword === typeof Error || hashedPassword === undefined) {
         throw new Error(hashedPassword);
@@ -27,7 +37,7 @@ class UserController {
             username: username,
             email: email,
             password: hashedPassword,
-            profilePicture: profilePicture,
+            profilePicture: this.defaultProfilePic,
           }).save();
 
           if (typeof user === typeof Error || user === undefined) {
@@ -38,6 +48,7 @@ class UserController {
               id: user._id,
               username: user.username,
               email: user.email,
+              profilePicture: user.profilePicture,
             });
           }
         }
@@ -47,7 +58,7 @@ class UserController {
     }
   }
 
-  public static async listAll(_: Request, res: Response) {
+  public async listAll(_: Request, res: Response) {
     try {
       const users = await UserModel.find({});
       if (typeof users === typeof Error || users === undefined) {
@@ -60,15 +71,16 @@ class UserController {
     }
   }
 
-  public static async editUser(req: Request, res: Response) {
+  public async editUser(req: Request, res: Response) {
     try {
-      // TODO: testar upload de imagem
-      const { id, username, email, bio, phone } = req.body;
+      const { id, profilePicture, username, email, bio, phone, password } =
+        await this.controller.localUploader.startUpload(req, res, "users");
       const fields = [
         { username: username },
         { email: email },
         { bio: bio },
         { phone: phone },
+        { password: password },
       ];
       const alreadyUsedEmail = await UserModel.findOne({
         email: email,
@@ -78,23 +90,16 @@ class UserController {
       } else {
         const foundUser = await UserModel.findById(id);
         if (foundUser) {
-          let changedFields: Array<Object> = [];
-          fields.forEach((field) => {
-            if (Object.values(field)[0] != undefined) {
-              const key = Object.keys(field)[0];
-              const value = Object.values(field)[0];
-              changedFields.push({
-                [key]: value,
-              });
+          updateFields(fields, foundUser);
+          if (profilePicture !== undefined) {
+            const newProfilePic = await foundUser.updateOne({
+              profilePicture: profilePicture,
+            });
+            if (!newProfilePic) {
+              throw new Error("Not possible to update image.");
             }
-          });
-          // TODO tem algo de errado com essa linha
-          const updatedFields = await foundUser.updateOne(changedFields[0]);
-          if (updatedFields) {
-            jsonResponse(res, 201, "User successfully updated.");
-          } else {
-            throw new Error("Can't update fields");
           }
+          jsonResponse(res, 200, "User sucessfully updated.");
         } else {
           throw new Error("User not found.");
         }
@@ -104,7 +109,7 @@ class UserController {
     }
   }
 
-  public static async deleteUser(req: Request, res: Response) {
+  public async deleteUser(req: Request, res: Response) {
     try {
       const id = req.params.id;
       if (!id) {

@@ -3,8 +3,7 @@ import { Application } from "express";
 import * as cors from "cors";
 import * as swaggerUi from "swagger-ui-express";
 
-import { uploaderRoutes } from "./routes/uploaderRoutes.js";
-import { userRoutes } from "./routes/userRoutes.js";
+import { userRoutes, uploaderRoutes } from "./routes/routes.js";
 
 export default class App {
   public app: Application;

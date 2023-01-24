@@ -1,33 +1,34 @@
 import { Request, Response } from "express";
+import { UploadApiResponse } from "cloudinary";
 
 import { ImageModel } from "../models/ImageModel.js";
 import jsonResponse from "../helpers/treatingResponses.js";
-import { LocalUploader } from "../models/LocalUploader.js";
-import { CloudinaryUploader } from "../models/CloudinaryUploader.js";
 import { saveImageToDatabase } from "../helpers/databaseOperations.js";
-import { UploadApiResponse } from "cloudinary";
 import { deleteTempImage } from "../helpers/deleteTempImage.js";
 import { updateFields, updateImage } from "../helpers/updateFields.js";
 import { error } from "../helpers/treatingErrors.js";
-
-const localUploader = new LocalUploader();
-const cloudUploader = new CloudinaryUploader();
+import { Controller } from "./Controller.js";
 
 // Routes Class
 export class UploaderController {
-  public static async saveImage(req: Request, res: Response): Promise<void> {
+  public controller: Controller;
+
+  constructor(controller: Controller) {
+    this.controller = controller;
+  }
+
+  public async saveImage(req: Request, res: Response): Promise<void> {
     try {
       // saving image to local temp folder
-      const { locallySavedImage, subtitle } = await localUploader.startUpload(req, res);
+      const { locallySavedImage, subtitle } =
+        await this.controller.localUploader.startUpload(req, res, "image");
       if (locallySavedImage !== undefined && subtitle !== undefined) {
         // uploading image to cloud service
-        const uploadedImage: UploadApiResponse = await cloudUploader.uploader(
-          locallySavedImage,
-          {
+        const uploadedImage: UploadApiResponse =
+          await this.controller.cloudUploader.uploader(locallySavedImage, {
             transformation: [{ quality: 30 }],
             folder: "images",
-          }
-        );
+          });
         // deleting image from temp folder
         const errorOnDelete = deleteTempImage(locallySavedImage);
         if (errorOnDelete) {
@@ -61,11 +62,12 @@ export class UploaderController {
         jsonResponse(res, 404, "One or more data requested was not fully returned.");
       }
     } catch (error: any) {
+      console.log(error);
       jsonResponse(res, 403, "Upload Error!", error.message);
     }
   }
 
-  public static async getImages(_: Request, res: Response): Promise<void> {
+  public async getImages(_: Request, res: Response): Promise<void> {
     try {
       const images = await ImageModel.find({});
       if (images) {
@@ -78,13 +80,11 @@ export class UploaderController {
     }
   }
 
-  public static async editImage(req: Request, res: Response) {
+  public async editImage(req: Request, res: Response) {
     try {
       // getting the values from request
-      const { id, locallySavedImage, subtitle } = await localUploader.startUpload(
-        req,
-        res
-      );
+      const { id, locallySavedImage, subtitle } =
+        await this.controller.localUploader.startUpload(req, res, "image");
       if (!id) {
         throw new Error("Image id not found.");
       } else {
@@ -94,13 +94,17 @@ export class UploaderController {
           throw new Error("Not found saved image from the given id.");
         }
         // verifying and validating every request fields (without image)
-        if (subtitle !== undefined && subtitle?.length !== 0) {
+        if (subtitle !== undefined) {
           // updating passed fields
           updateFields([{ subtitle: subtitle }], foundImage);
         }
         // getting image because comes from other object (req.file)
         if (locallySavedImage !== undefined) {
-          updateImage(locallySavedImage, cloudUploader, foundImage.publicID!);
+          updateImage(
+            locallySavedImage,
+            this.controller.cloudUploader,
+            foundImage.publicID!
+          );
         }
         jsonResponse(res, 201, "Image successfully updated.");
       }
@@ -109,7 +113,7 @@ export class UploaderController {
     }
   }
 
-  public static async deleteImage(req: Request, res: Response) {
+  public async deleteImage(req: Request, res: Response) {
     try {
       const id: string = req.params.id;
       if (id === undefined) {
@@ -119,7 +123,9 @@ export class UploaderController {
         if (image) {
           const imagePublicID = image.publicID;
           // deleting image from Cloudinary
-          const cloudinaryDeletedImage = await cloudUploader.destroyer(imagePublicID!);
+          const cloudinaryDeletedImage = await this.controller.cloudUploader.destroyer(
+            imagePublicID!
+          );
           if (cloudinaryDeletedImage) {
             // deleting image from Mongo database
             const databaseDeletedImage = await ImageModel.deleteOne({

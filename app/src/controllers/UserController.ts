@@ -6,6 +6,7 @@ import { UserModel } from "../models/UserModel.js";
 import { updateFields } from "../helpers/updateFields.js";
 import { Controller } from "./Controller.js";
 import { error } from "../helpers/treatingErrors.js";
+import { generateToken } from "../helpers/generateToken.js";
 
 class UserController {
   private controller: Controller;
@@ -19,7 +20,7 @@ class UserController {
       "https://res.cloudinary.com/dpuvdfcf9/image/upload/v1674144178/userPictures/0596bdb89b60fe771acd2f5972a9d3e3_isnvff.jpg";
   }
 
-  public async createUser(req: Request, res: Response): Promise<void> {
+  public async register(req: Request, res: Response): Promise<void> {
     try {
       const { username, email, password } = req.body;
       const hashedPassword = await bcrypt.hash(password, this.saltRound);
@@ -45,17 +46,54 @@ class UserController {
             throw new Error(user.toString());
           } else {
             // user successfully saved in database
+            const token = generateToken(user);
+            if (!token) {
+              throw new Error("Failed token.");
+            }
             jsonResponse(res, 200, "User successfully saved.", {
               id: user._id,
               username: user.username,
               email: user.email,
               profilePicture: user.profilePicture,
+              token: token,
             });
           }
         }
       }
     } catch (error: any) {
       jsonResponse(res, 400, error.message);
+    }
+  }
+
+  public async login(req: Request, res: Response) {
+    try {
+      const { email, password } = req.body;
+      const foundUser = await UserModel.findOne({
+        email: email,
+      }).select("email password username");
+      if (!foundUser) {
+        throw new Error("Email not found.");
+      }
+      const isMatch = bcrypt.compareSync(password, foundUser.password);
+      if (isMatch) {
+        const userID = foundUser.id;
+        const email = foundUser.email;
+        const token = generateToken(foundUser);
+        if (!token) {
+          throw new Error("Failed token.");
+        }
+        jsonResponse(res, 200, "Sucessfully logged.", {
+          user: {
+            userID,
+            email,
+          },
+          token: token,
+        });
+      } else {
+        throw new Error("Incorrect passowrd.");
+      }
+    } catch (error: any) {
+      jsonResponse(res, 404, "Not possible to login", error.message);
     }
   }
 

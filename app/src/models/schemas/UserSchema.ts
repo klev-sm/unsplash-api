@@ -1,6 +1,7 @@
-import mongoose from "mongoose";
+import { Schema } from "mongoose";
+import { IUserDocument } from "../interfaces/IUserDocument";
 
-const UserSchema = new mongoose.Schema({
+const UserSchema: Schema<IUserDocument> = new Schema({
   username: {
     type: String,
     required: true,

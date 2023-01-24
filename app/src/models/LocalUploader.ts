@@ -6,7 +6,7 @@ import { RequestHandler, Request, Response } from "express";
 import * as path from "path";
 import * as fs from "fs";
 
-import { ILocalImage } from "./ILocalImage.js";
+import { ILocalImage } from "../interfaces/ILocalImage";
 
 class LocalUploader {
   protected storage: StorageEngine;

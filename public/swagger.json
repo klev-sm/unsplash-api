@@ -22,6 +22,10 @@
     {
       "name": "images",
       "description": "Every route to CRUD images"
+    },
+    {
+      "name": "user",
+      "description": "Every route to CRUD users"
     }
   ],
   "paths": {
@@ -161,7 +165,7 @@
         ],
         "description": "If it was passed, the subtitle is changed on database, but the image link in the database remains the same, changing only the image uploaded to Cloudinary.",
         "requestBody": {
-          "description": "You need to provide the mongo's database (_id) in order to the route find the image that you want to edit. You can edit image or subtitle or both, the only thing that changes it is if you pass or not the valou of a propertie.",
+          "description": "You need to provide the mongo's database (_id) in order to the route find the image that you want to edit. You can edit image or subtitle or both, the only thing that changes it is if you pass or not the value of a propertie.",
           "required": true,
           "content": {
             "multipart/form-data": {
@@ -235,6 +239,270 @@
           },
           "404": {
             "description": "Image not found"
+          }
+        }
+      }
+    },
+    "/user": {
+      "post": {
+        "summary": "Create a new user",
+        "tags": [
+          "user"
+        ],
+        "description": "Only username, password and email are required. The other fields will only be setted when editing user through PUT route. Every user that you creates have an default profile picture that is an image already saved on Cloudinary service, you can change the default picture after on PUT route.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string",
+                    "description": "You need to pass an email that does not exists on database."
+                  },
+                  "password": {
+                    "type": "string",
+                    "description": "The password will be encrypted on back-end. You can update it from PUT route, but you will never get."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "User successfully saved."
+                    },
+                    "response": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "example": "63c93d3374cc28be0abf44e1"
+                        },
+                        "username": {
+                          "type": "string",
+                          "example": "Kleverton"
+                        },
+                        "email": {
+                          "type": "string",
+                          "example": "kleverton@gmail.com"
+                        },
+                        "profilePicture": {
+                          "type": "string",
+                          "example": "https://res.cloudinary.com/dpuvdfcf9/image/upload/v1674144178/userPictures/0596bdb89b60fe771acd2f5972a9d3e3_isnvff.jpg"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Default Error, will be throwned when an email that you want to save already exists, if was an error trying to hash the password or save the user to the database.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Email already exists"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "summary": "Get all saved users.",
+        "tags": [
+          "user"
+        ],
+        "responses": {
+          "200": {
+            "description": "Images successfully returned",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Success message.",
+                      "example": "Users sucessfully returned."
+                    },
+                    "response": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "_": {
+                            "type": "string",
+                            "description": "The id generated by Mongo database",
+                            "example": "63cf28fe6a523d2a5a85d5e2"
+                          },
+                          "username": {
+                            "type": "string",
+                            "description": "The name of the passed user.",
+                            "example": "Kleverton"
+                          },
+                          "email": {
+                            "type": "string",
+                            "example": "kleverton@gmail.com"
+                          },
+                          "profilePicture": {
+                            "type": "number",
+                            "example": "https://res.cloudinary.com/dpuvdfcf9/image/upload/v1674144178/userPictures/0596bdb89b60fe771acd2f5972a9d3e3_isnvff.jpg"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Unknown Error."
+          },
+          "404": {
+            "description": "Users not found"
+          }
+        }
+      },
+      "put": {
+        "summary": "Edit an existent user.",
+        "tags": [
+          "user"
+        ],
+        "description": "You can update almost all fields from an user, except the id. You also can edit as many as field you want every requisition.",
+        "requestBody": {
+          "required": true,
+          "description": "You need to provide the mongo's database (id) in order to the route find the user that you want to edit. You only can edit one user at a time. Every field is optional, except id.",
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "profilePicture": {
+                    "type": "string",
+                    "format": "binary"
+                  },
+                  "username": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string",
+                    "description": "You need to pass an email that does not exists on database."
+                  },
+                  "bio": {
+                    "type": "string",
+                    "description": "Doesn't have character limit, sou you must do that on before upload if you want"
+                  },
+                  "phone": {
+                    "type": "string",
+                    "description": "Doesn't have validation on backend, so you must provide the validation and certify that the type is a string before change the field."
+                  },
+                  "password": {
+                    "type": "string",
+                    "description": "The password will be encrypted on server."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successfull operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "User sucessfully updated."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Default Error, will be throwned when an email that you want to edit already exists, if it was not possible to find the given ID from requisition and if was not possible to update image by uploading to database.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Email already exists"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/{id}": {
+      "delete": {
+        "summary": "Delete a saved user",
+        "tags": [
+          "user"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The id of the saved user in database to delete.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User Sucessfully Deleted.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "User sucessfully updated."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "It was not possible to delete user."
+          },
+          "404": {
+            "description": "Not possible to find given id"
           }
         }
       }

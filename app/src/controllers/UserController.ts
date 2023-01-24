@@ -5,6 +5,7 @@ import jsonResponse from "../helpers/treatingResponses.js";
 import { UserModel } from "../models/UserModel.js";
 import { updateFields } from "../helpers/updateFields.js";
 import { Controller } from "./Controller.js";
+import { error } from "../helpers/treatingErrors.js";
 
 class UserController {
   private controller: Controller;
@@ -62,12 +63,16 @@ class UserController {
     try {
       const users = await UserModel.find({});
       if (typeof users === typeof Error || users === undefined) {
-        throw new Error(users.toString());
+        error("Error!", "Not Found");
       } else {
         jsonResponse(res, 200, "Users sucessfully returned", users);
       }
-    } catch (error) {
-      jsonResponse(res, 400, "Failed to return users", error!);
+    } catch (error: any) {
+      let statusCode = 400;
+      if (error.name === "Not Found") {
+        statusCode = 404;
+      }
+      jsonResponse(res, statusCode, "Failed to return users", error!);
     }
   }
 
@@ -113,7 +118,7 @@ class UserController {
     try {
       const id = req.params.id;
       if (!id) {
-        throw new Error("Not found id.");
+        error("Not possible to find id", "Not Found");
       } else {
         const deletedUser = await UserModel.findById(id).deleteOne();
         if (deletedUser === undefined || typeof deletedUser === typeof Error) {
@@ -123,7 +128,11 @@ class UserController {
         }
       }
     } catch (error: any) {
-      jsonResponse(res, 200, error);
+      let statusCode = 400;
+      if (error.name === "Not Found") {
+        statusCode = 404;
+      }
+      jsonResponse(res, statusCode, "Failed to return users", error!);
     }
   }
 }

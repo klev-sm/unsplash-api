@@ -3,6 +3,10 @@
 
 <p align="center"><a href="https://unsplash-yi42.onrender.com">API Server</a> | <a href="https://unsplash-yi42.onrender.com/docs">Swagger Documentation</a></p>
 
+## Used technologies
+Typescript, Express, JWT Auth, Multer, Cloudinary Services, MongoDB using Mongoose, Bcrypt and Swagger.
+Architeture: MVC Pattern
+
 ## How To Use
 To clone and run this application, you'll need Git and Node.js (which comes with npm) installed on your computer. 
 From your command line:

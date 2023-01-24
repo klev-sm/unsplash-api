@@ -1,5 +1,5 @@
-import { CloudinaryUploader } from "../models/CloudinaryUploader";
-import { LocalUploader } from "../models/services/LocalUploader";
+import { CloudinaryUploader } from "../models/CloudinaryUploader.js";
+import { LocalUploader } from "../models/LocalUploader.js";
 
 class Controller {
   public localUploader: LocalUploader;

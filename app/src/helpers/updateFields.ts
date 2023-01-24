@@ -3,7 +3,7 @@ import { Document } from "mongoose";
 import { CloudinaryUploader } from "../models/CloudinaryUploader";
 import { deleteTempImage } from "./deleteTempImage";
 
-function updateFields(fieldsToUpdate: Array<Object>, foundedModel: Document) {
+function updateFields(fieldsToUpdate: Array<Object>, foundedModel: Document): Object[] {
   // getting all the fields that will be saved on database
   // image link on database does not changes.
   const fields = fieldsToUpdate;
@@ -26,6 +26,8 @@ function updateFields(fieldsToUpdate: Array<Object>, foundedModel: Document) {
       throw new Error("Not able to update the given field.");
     }
   });
+
+  return changedFields;
 }
 
 async function updateImage(

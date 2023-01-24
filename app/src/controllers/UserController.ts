@@ -133,7 +133,7 @@ class UserController {
       } else {
         const foundUser = await UserModel.findById(id);
         if (foundUser) {
-          updateFields(fields, foundUser);
+          const changedFields = updateFields(fields, foundUser);
           if (profilePicture !== undefined) {
             const newProfilePic = await foundUser.updateOne({
               profilePicture: profilePicture,
@@ -142,7 +142,15 @@ class UserController {
               throw new Error("Not possible to update image.");
             }
           }
-          jsonResponse(res, 200, "User sucessfully updated.");
+          jsonResponse(res, 200, "User sucessfully updated.", {
+            user: {
+              _id: id,
+              user: foundUser.username,
+              email: foundUser.email,
+              profilePicture: foundUser.profilePicture,
+            },
+            changedFields: changedFields,
+          });
         } else {
           throw new Error("User not found.");
         }

@@ -23,6 +23,6 @@ userRoutes
   .post("/user/login", userController.login.bind(userController))
   .get("/user", userController.listAll.bind(userController))
   .put("/user", auth, userController.editUser.bind(userController))
-  .delete("/user/:id", userController.deleteUser.bind(userController));
+  .delete("/user/:id", auth, userController.deleteUser.bind(userController));
 
 export { userRoutes, uploaderRoutes };

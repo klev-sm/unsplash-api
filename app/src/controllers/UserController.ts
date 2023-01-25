@@ -152,10 +152,7 @@ class UserController {
               this.controller.cloudUploader.destroyer(foundUser.profilePicture.publicID);
             }
             const newProfilePic = await foundUser.updateOne({
-              profilePicture: {
-                image: updatedImage.secure_url,
-                publicID: updatedImage.public_id,
-              },
+              profilePicture: updatedImage.secure_url,
             });
             if (!newProfilePic) {
               throw new Error("Not possible to update image.");
@@ -165,10 +162,7 @@ class UserController {
                 _id: id,
                 user: foundUser.username,
                 email: foundUser.email,
-                profilePicture: {
-                  image: updatedImage.secure_url,
-                  publicID: foundUser.profilePicture.publicID,
-                },
+                profilePicture: updatedImage.secure_url,
               },
               changedFields: changedFields,
             });

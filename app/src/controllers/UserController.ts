@@ -117,7 +117,7 @@ class UserController {
   public async editUser(req: Request, res: Response) {
     try {
       const { id, profilePicture, username, email, bio, phone, password } =
-        await this.controller.localUploader.startUpload(req, res, "users");
+        await this.controller.localUploader.startUpload(req, res, "image");
       const fields = [
         { username: username },
         { email: email },

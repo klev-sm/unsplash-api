@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { Request, Response, json } from "express";
 import * as bcrypt from "bcrypt";
 
 import jsonResponse from "../helpers/treatingResponses.js";
@@ -7,6 +7,8 @@ import { updateAndSaveImage, updateFields } from "../helpers/updateFields.js";
 import { Controller } from "./Controller.js";
 import { error } from "../helpers/treatingErrors.js";
 import { generateToken } from "../helpers/generateToken.js";
+import { ICustomRequest, ITokenReturn } from "../models/interfaces/ICustomRequest.js";
+import { JwtPayload } from "jsonwebtoken";
 
 class UserController {
   private controller: Controller;
@@ -140,17 +142,17 @@ class UserController {
         if (foundUser) {
           const changedFields = updateFields(fields, foundUser);
           if (profilePicture !== undefined) {
-            // delete previous saved image if it is not the default image
             // uploading and updating to Cloudinary
             const updatedImage = await updateAndSaveImage(
               profilePicture,
               this.controller.cloudUploader,
               "userPictures"
             );
-            // updating on database
+            // delete previous saved image if it is not the default image
             if (foundUser.profilePicture.image !== this.defaultProfilePic) {
               this.controller.cloudUploader.destroyer(foundUser.profilePicture.publicID);
             }
+            // updating on database
             const newProfilePic = await foundUser.updateOne({
               profilePicture: updatedImage.secure_url,
             });
@@ -198,20 +200,16 @@ class UserController {
     }
   }
 
-  public async getUserImages(req: Request, res: Response) {
+  public async getLoggedUser(req: Request, res: Response) {
     try {
-      const id = req.body;
-      if (!id) {
-        throw new Error("User not found");
+      const token = (req as ICustomRequest).token as ITokenReturn;
+      const foundUser = await UserModel.findById(token._id).populate("images");
+      if (!foundUser) {
+        throw new Error("User not found.");
       }
-      const foundUser = await UserModel.findById(id).populate("images");
-      if (foundUser) {
-        jsonResponse(res, 200, "User Sucessfully returned", foundUser);
-      } else {
-        throw new Error("Failed to find user.");
-      }
-    } catch (error) {
-      jsonResponse(res, 400, "Error !");
+      jsonResponse(res, 200, "User successfully returned", foundUser);
+    } catch (error: any) {
+      jsonResponse(res, 400, "Not able to return user", error.message);
     }
   }
 }

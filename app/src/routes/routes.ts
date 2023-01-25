@@ -22,6 +22,7 @@ userRoutes
   .post("/user", userController.register.bind(userController))
   .post("/user/login", userController.login.bind(userController))
   .get("/user", userController.listAll.bind(userController))
+  .get("/user/byToken", auth, userController.getLoggedUser.bind(userController))
   .put("/user", auth, userController.editUser.bind(userController))
   .delete("/user/:id", auth, userController.deleteUser.bind(userController));
 

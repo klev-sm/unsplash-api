@@ -551,7 +551,7 @@
         "tags": [
           "user"
         ],
-        "description": "Route to authenticate an user, you need to provide a valid and unused e-mail and a password. This route will also return an authentication token, that you have to store on client cookies using httpOnly",
+        "description": "Route to authenticate an user, you need to provide a valid saved e-mail and a password. This route will also return an authentication token, that you have to store on client cookies using httpOnly",
         "requestBody": {
           "required": true,
           "content": {
@@ -561,11 +561,11 @@
                 "properties": {
                   "email": {
                     "type": "string",
-                    "description": "You need to pass an email that does not exists on database."
+                    "description": "You need to pass an email that exists on database."
                   },
                   "password": {
                     "type": "string",
-                    "description": "The password will be hashed on back-end."
+                    "description": "The password that will be hashed on back-end."
                   }
                 }
               }

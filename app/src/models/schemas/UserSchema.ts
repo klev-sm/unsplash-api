@@ -18,7 +18,10 @@ const UserSchema: Schema<IUserDocument> = new Schema({
   },
   bio: String,
   phone: String,
-  profilePicture: String,
+  profilePicture: {
+    image: String,
+    publicID: String,
+  },
   images: [
     {
       type: Types.ObjectId,

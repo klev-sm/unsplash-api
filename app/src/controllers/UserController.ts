@@ -3,7 +3,7 @@ import * as bcrypt from "bcrypt";
 
 import jsonResponse from "../helpers/treatingResponses.js";
 import { UserModel } from "../models/UserModel.js";
-import { updateFields } from "../helpers/updateFields.js";
+import { updateAndSaveImage, updateFields } from "../helpers/updateFields.js";
 import { Controller } from "./Controller.js";
 import { error } from "../helpers/treatingErrors.js";
 import { generateToken } from "../helpers/generateToken.js";
@@ -12,12 +12,14 @@ class UserController {
   private controller: Controller;
   private saltRound: number;
   private defaultProfilePic: string;
+  private defaultProfilePublicID: string;
 
   constructor(controller: Controller, salt: number) {
     this.controller = controller;
     this.saltRound = salt;
     this.defaultProfilePic =
-      "https://res.cloudinary.com/dpuvdfcf9/image/upload/v1674144178/userPictures/0596bdb89b60fe771acd2f5972a9d3e3_isnvff.jpg";
+      "https://res.cloudinary.com/dpuvdfcf9/image/upload/v1674653316/userPictures/0596bdb89b60fe771acd2f5972a9d3e3_xh9jze.jpg";
+    this.defaultProfilePublicID = "userPictures/0596bdb89b60fe771acd2f5972a9d3e3_xh9jze";
   }
 
   public async register(req: Request, res: Response): Promise<void> {
@@ -39,7 +41,10 @@ class UserController {
             username: username,
             email: email,
             password: hashedPassword,
-            profilePicture: this.defaultProfilePic,
+            profilePicture: {
+              image: this.defaultProfilePic,
+              publicID: this.defaultProfilePublicID,
+            },
           }).save();
 
           if (typeof user === typeof Error || user === undefined) {
@@ -135,22 +140,39 @@ class UserController {
         if (foundUser) {
           const changedFields = updateFields(fields, foundUser);
           if (profilePicture !== undefined) {
+            // delete previous saved image if it is not the default image
+            // uploading and updating to Cloudinary
+            const updatedImage = await updateAndSaveImage(
+              profilePicture,
+              this.controller.cloudUploader,
+              "userPictures"
+            );
+            // updating on database
+            if (foundUser.profilePicture.image !== this.defaultProfilePic) {
+              this.controller.cloudUploader.destroyer(foundUser.profilePicture.publicID);
+            }
             const newProfilePic = await foundUser.updateOne({
-              profilePicture: profilePicture,
+              profilePicture: {
+                image: updatedImage.secure_url,
+                publicID: updatedImage.public_id,
+              },
             });
             if (!newProfilePic) {
               throw new Error("Not possible to update image.");
             }
+            jsonResponse(res, 200, "User sucessfully updated.", {
+              user: {
+                _id: id,
+                user: foundUser.username,
+                email: foundUser.email,
+                profilePicture: {
+                  image: updatedImage.secure_url,
+                  publicID: foundUser.profilePicture.publicID,
+                },
+              },
+              changedFields: changedFields,
+            });
           }
-          jsonResponse(res, 200, "User sucessfully updated.", {
-            user: {
-              _id: id,
-              user: foundUser.username,
-              email: foundUser.email,
-              profilePicture: foundUser.profilePicture,
-            },
-            changedFields: changedFields,
-          });
         } else {
           throw new Error("User not found.");
         }

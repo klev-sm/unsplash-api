@@ -5,10 +5,9 @@ import { ImageModel } from "../models/ImageModel.js";
 import jsonResponse from "../helpers/treatingResponses.js";
 import { saveImageToDatabase } from "../helpers/databaseOperations.js";
 import { deleteTempImage } from "../helpers/deleteTempImage.js";
-import { updateFields, updateImage } from "../helpers/updateFields.js";
+import { updateFields, overrideImage } from "../helpers/updateFields.js";
 import { error } from "../helpers/treatingErrors.js";
 import { Controller } from "./Controller.js";
-import { ICustomRequest } from "../models/interfaces/ICustomRequest.js";
 
 // Routes Class
 export class UploaderController {
@@ -101,7 +100,7 @@ export class UploaderController {
         }
         // getting image because comes from other object (req.file)
         if (locallySavedImage !== undefined) {
-          updateImage(
+          overrideImage(
             locallySavedImage,
             this.controller.cloudUploader,
             foundImage.publicID!

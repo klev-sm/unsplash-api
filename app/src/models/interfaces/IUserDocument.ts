@@ -8,6 +8,9 @@ export interface IUserDocument extends Document {
   password: string;
   bio: string;
   phone: string;
-  profilePicture: string;
+  profilePicture: {
+    image: string;
+    publicID: string;
+  };
   images: typeof ImageSchema;
 }

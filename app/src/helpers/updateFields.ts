@@ -30,11 +30,11 @@ function updateFields(fieldsToUpdate: Array<Object>, foundedModel: Document): Ob
   return changedFields;
 }
 
-async function updateImage(
+async function overrideImage(
   locallySavedImage: string,
   cloudUploader: CloudinaryUploader,
   publicID: string
-) {
+): Promise<UploadApiResponse> {
   // uploading image to cloud service
   const uploadedImage: UploadApiResponse = await cloudUploader.uploader(
     locallySavedImage,
@@ -52,6 +52,31 @@ async function updateImage(
   if (!uploadedImage) {
     throw new Error(uploadedImage);
   }
+  return uploadedImage;
 }
 
-export { updateFields, updateImage };
+async function updateAndSaveImage(
+  locallySavedImage: string,
+  cloudUploader: CloudinaryUploader,
+  folder: string
+) {
+  // uploading image to cloud service
+  const uploadedImage: UploadApiResponse = await cloudUploader.uploader(
+    locallySavedImage,
+    {
+      folder: folder,
+      transformation: [{ quality: 30 }],
+    }
+  );
+  // deleting image from temp folder
+  const errorOnDelete = deleteTempImage(locallySavedImage);
+  if (errorOnDelete) {
+    throw new Error(errorOnDelete.message);
+  }
+  if (!uploadedImage) {
+    throw new Error(uploadedImage);
+  }
+  return uploadedImage;
+}
+
+export { updateFields, overrideImage, updateAndSaveImage };

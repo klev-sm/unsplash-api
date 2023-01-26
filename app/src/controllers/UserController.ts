@@ -117,8 +117,6 @@ class UserController {
 
   public async editUser(req: Request, res: Response) {
     try {
-      const token = (req as ICustomRequest).token as ITokenReturn;
-
       const { id, profilePicture, username, email, bio, phone, password } =
         await this.controller.localUploader.startUpload(req, res, "image");
       const fields = [

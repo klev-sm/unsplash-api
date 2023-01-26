@@ -103,7 +103,7 @@ export class UploaderController {
           overrideImage(
             locallySavedImage,
             this.controller.cloudUploader,
-            foundImage.publicID!
+            foundImage.publicId!
           );
         }
         jsonResponse(res, 201, "Image successfully updated.");
@@ -121,7 +121,7 @@ export class UploaderController {
       } else {
         const image = await ImageModel.findById(id);
         if (image) {
-          const imagePublicID = image.publicID;
+          const imagePublicID = image.publicId;
           // deleting image from Cloudinary
           const cloudinaryDeletedImage = await this.controller.cloudUploader.destroyer(
             imagePublicID!

@@ -12,5 +12,4 @@ export interface IUserDocument extends Document {
     image: string;
     publicID: string;
   };
-  images: typeof ImageSchema;
 }

@@ -22,12 +22,6 @@ const UserSchema: Schema<IUserDocument> = new Schema({
     image: String,
     publicID: String,
   },
-  images: [
-    {
-      type: Types.ObjectId,
-      ref: "images",
-    },
-  ],
 });
 
 export { UserSchema };

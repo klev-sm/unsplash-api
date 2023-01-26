@@ -8,7 +8,7 @@ import { Controller } from "./Controller.js";
 import { error } from "../helpers/treatingErrors.js";
 import { generateToken } from "../helpers/generateToken.js";
 import { ICustomRequest, ITokenReturn } from "../models/interfaces/ICustomRequest.js";
-import { JwtPayload } from "jsonwebtoken";
+import { userReturn } from "../helpers/userReturn.js";
 
 class UserController {
   private controller: Controller;
@@ -57,13 +57,7 @@ class UserController {
             if (!token) {
               throw new Error("Failed token.");
             }
-            jsonResponse(res, 200, "User successfully saved.", {
-              id: user._id,
-              username: user.username,
-              email: user.email,
-              profilePicture: user.profilePicture,
-              token: token,
-            });
+            jsonResponse(res, 200, "User successfully saved.", userReturn(user, token));
           }
         }
       }
@@ -196,20 +190,20 @@ class UserController {
       if (error.name === "Not Found") {
         statusCode = 404;
       }
-      jsonResponse(res, statusCode, "Failed to return users", error!);
+      jsonResponse(res, statusCode, "Failed to return users", error);
     }
   }
 
   public async getLoggedUser(req: Request, res: Response) {
     try {
       const token = (req as ICustomRequest).token as ITokenReturn;
-      const foundUser = await UserModel.findById(token._id).populate("images");
+      const foundUser = await UserModel.findById(token._id);
       if (!foundUser) {
         throw new Error("User not found.");
       }
-      jsonResponse(res, 200, "User successfully returned", foundUser);
+      jsonResponse(res, 200, "User successfully returned", userReturn(foundUser, token));
     } catch (error: any) {
-      jsonResponse(res, 400, "Not able to return user", error.message);
+      jsonResponse(res, 400, "Not able to return user", error);
     }
   }
 }

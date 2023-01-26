@@ -1,9 +1,17 @@
 import { UploadApiResponse } from "cloudinary";
 import { ImageModel } from "../models/ImageModel";
+import { Types } from "mongoose";
 
 type ModelImage = {
   uploadedImage?: UploadApiResponse;
   subtitle?: string;
+};
+
+type ImageByUser = {
+  userId: {
+    type: Types.ObjectId;
+    ref: "users";
+  };
 };
 
 type Sanitizer = {

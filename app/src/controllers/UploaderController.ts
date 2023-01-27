@@ -68,7 +68,6 @@ export class UploaderController {
         jsonResponse(res, 404, "One or more data requested was not fully returned.");
       }
     } catch (error: any) {
-      console.log(error);
       jsonResponse(res, 403, "Upload Error!", error.message);
     }
   }

@@ -98,23 +98,6 @@ class UserController {
     }
   }
 
-  public async listAll(_: Request, res: Response) {
-    try {
-      const users = await UserModel.find({});
-      if (typeof users === typeof Error || users === undefined) {
-        error("Error!", "Not Found");
-      } else {
-        jsonResponse(res, 200, "Users sucessfully returned", users);
-      }
-    } catch (error: any) {
-      let statusCode = 400;
-      if (error.name === "Not Found") {
-        statusCode = 404;
-      }
-      jsonResponse(res, statusCode, "Failed to return users", error!);
-    }
-  }
-
   public async editUser(req: Request, res: Response) {
     try {
       const { id, profilePicture, username, email, bio, phone, password } =
@@ -201,7 +184,7 @@ class UserController {
       if (!foundUser) {
         throw new Error("User not found.");
       }
-      jsonResponse(res, 200, "User successfully returned", userReturn(foundUser, token));
+      jsonResponse(res, 200, "User successfully returned", userReturn(foundUser));
     } catch (error: any) {
       jsonResponse(res, 400, "Not able to return user", error);
     }

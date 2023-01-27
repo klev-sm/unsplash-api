@@ -7,7 +7,7 @@ export function userReturn(user: IUserDocument, token?: ITokenReturn | string): 
     username: user.username,
     email: user.email,
     profilePicture: user.profilePicture.image || user.profilePicture,
-    token: token || "Token visualization not necessary in this route",
+    token: token || "Token visualization is not necessary in this route",
     bio: user?.bio || "",
     phone: user.phone || "",
   };

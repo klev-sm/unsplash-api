@@ -117,7 +117,7 @@ class UserController {
       } else {
         const foundUser = await UserModel.findById(id);
         if (foundUser) {
-          const changedFields = updateFields(fields, foundUser);
+          updateFields(fields, foundUser);
           if (profilePicture !== undefined) {
             // uploading and updating to Cloudinary
             const updatedImage = await updateAndSaveImage(
@@ -136,16 +136,8 @@ class UserController {
             if (!newProfilePic) {
               throw new Error("Not possible to update image.");
             }
-            jsonResponse(res, 200, "User sucessfully updated.", {
-              user: {
-                _id: id,
-                user: foundUser.username,
-                email: foundUser.email,
-                profilePicture: updatedImage.secure_url,
-              },
-              changedFields: changedFields,
-            });
           }
+          jsonResponse(res, 200, "User sucessfully updated.");
         } else {
           throw new Error("User not found.");
         }
